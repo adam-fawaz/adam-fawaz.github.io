@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Line Interface</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Themes -->
+    <style id="theme1">
+        body {
+            background-color: #1d2a35;
+            color: #cdd5e0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 500;
+            font-size: 16px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin: 0; /* Ensure no margin around the body */
+        }
+    </style>
+    <style id="theme2">
+        body {
+            background-color: #f0f8ff;
+            color: #000;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+    </style>
+    <style id="theme3">
+        body {
+            background-color: #ffebcd;
+            color: #000;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+    </style>
+    <style id="theme4">
+        body {
+            background-color: #e0ffff;
+            color: #000;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+    </style>
+    <style id="theme5">
+        body {
+            background-color: #faf0e6;
+            color: #000;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+    </style>
+    <style>
+        div {
+            padding: 0; /* No padding within divs */
+            border: none; /* No borders */
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            width: 100%; /* Sets the container to full width */
+        }
+        .input-container input {
+            margin-left: 11px;
+            border: none;
+            box-shadow: none;
+            background: none;
+            color: inherit;
+            font-family: inherit;
+            font-weight: inherit;
+            font-size: inherit;
+            outline: none;
+            caret-color: #05ce92;
+            width: 100%; /* Makes the input field take the remaining space */
+            flex-grow: 1; /* Allows the input to grow and fill available space */
+        }
+        p {
+            margin: 0; /* No margin on paragraph tags */
+        }
+        .autocomplete-options {
+            color: #05ce92;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            display: none;
+            white-space: pre-wrap;
+        }
+        .help-divider {
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+        .help-feature {
+            display: flex; /* Sets the .help-feature to use Flexbox */
+            width: 100%; /* Full width to its parent container */
+            margin-bottom: 3px;
+        }
+        .help-feature p:first-child {
+            width: 135px; /* Sets the width of the first paragraph */
+            color: #05ce92; /* Sets the text color of the first paragraph */
+        }
+        .help-feature p:last-child {
+            flex-grow: 1; /* Allows the last paragraph to take up remaining space */
+        }
+        .help-tool {
+            display: flex; /* Sets the .help-feature to use Flexbox */
+            width: 100%; /* Full width to its parent container */
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .help-tool p:first-child {
+            width: 135px; /* Sets the width of the first paragraph */
+        }
+        .help-tool p:last-child {
+            flex-grow: 1; /* Allows the last paragraph to take up remaining space */
+        }
+        .help {
+            margin-top: 4px;
+            display: none; /* Initially hide the help section */
+            margin-bottom: 15px;
+        }
+        .about {
+            margin-top: 4px;
+            display: none; /* Initially hide the about section */
+            margin-bottom: 15px;
+        }
+        .about p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 1.6;
+        }
+        .education {
+            margin-top: 4px;
+            display: none; /* Initially hide the education section */
+            margin-bottom: 15px;
+        }
+        .education p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 1;
+        }
+        .education-more {
+            margin-top: 4px;
+            display: none; /* Initially hide the education-more section */
+            margin-bottom: 15px;
+        }
+        .education-more p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 1;
+        }
+        .email {
+            margin-top: 4px;
+            display: none; /* Initially hide the email section */
+            margin-bottom: 15px;
+        }
+        .email p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 1;
+        }
+        .socials {
+            margin-top: 5px;
+            display: none;
+            margin-bottom: 15px;
+        }
+        .socials p {
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        .socials p > span {
+            color: #05ce92;
+        }
+        .projects {
+            margin-top: 5px;
+            display: none; /* Initially hide the projects section */
+            margin-bottom: 15px;
+        }
+        .projects p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 0.9;
+        }
+        .projects-more {
+            margin-top: 5px;
+            display: none; /* Initially hide the projects-more section */
+            margin-bottom: 15px;
+        }
+        .projects-more p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 0.9;
+        }
+        .error {
+            margin-top: 2px;
+            display: none; /* Initially hide the error section */
+            margin-bottom: 10px;
+        }
+        .error p {
+            margin-bottom: 10px; /* Adjust the value as needed */
+            line-height: 1.6;
+        }
+    </style>       
+    <script>
+        const commandHistory = [];
+        let historyIndex = -1;
+
+        const commands = [
+            'help',
+            'about',
+            'education',
+            'education --more',
+            'email',
+            'socials',
+            'socials go 1',
+            'socials go 2',
+            'socials go 3',
+            'projects',
+            'projects --more',
+            'themes'
+        ];
+
+        const mainCommands = [
+            'help',
+            'about',
+            'education',
+            'email',
+            'socials',
+            'projects',
+            'themes'
+        ];
+
+        function setDefaultTheme() {
+            document.getElementById('theme1').disabled = false;
+            document.getElementById('theme2').disabled = true;
+            document.getElementById('theme3').disabled = true;
+            document.getElementById('theme4').disabled = true;
+            document.getElementById('theme5').disabled = true;
+        }
+
+        function focusInput(inputElement) {
+            inputElement.focus();
+        }
+
+        function moveCursorToEnd(inputElement) {
+            setTimeout(() => {
+                inputElement.selectionStart = inputElement.selectionEnd = inputElement.value.length;
+            }, 0);
+        }
+
+        function handleInput(event) {
+            const inputElement = event.target;
+
+            if (event.key === 'Enter') {
+                clearAutocompleteOptions();
+                const inputValue = inputElement.value.trim();
+
+                if (inputValue !== '') {
+                    inputElement.disabled = true;
+                    historyIndex = -1; // Reset history index
+                    commandHistory.push(inputValue); // Store the command
+                    let commandHandled = false;
+
+                    if (inputValue === 'help') {
+                        const helpDiv = document.querySelector('.help').cloneNode(true);
+                        helpDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', helpDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'about') {
+                        const aboutDiv = document.querySelector('.about').cloneNode(true);
+                        aboutDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', aboutDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'education') {
+                        const educationDiv = document.querySelector('.education').cloneNode(true);
+                        educationDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', educationDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'education --more') {
+                        const educationMoreDiv = document.querySelector('.education-more').cloneNode(true);
+                        educationMoreDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', educationMoreDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'email') {
+                        const emailDiv = document.querySelector('.email').cloneNode(true);
+                        emailDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', emailDiv);
+                        window.location.href = 'mailto:me@adamfawaz.com';
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'socials') {
+                        const socialsDiv = document.querySelector('.socials').cloneNode(true);
+                        socialsDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', socialsDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'socials go 1') {
+                        window.open('https://linkedin.com/in/adam-fawaz/', '_blank');
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'socials go 2') {
+                        window.open('https://github.com/adam-fawaz', '_blank');
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'socials go 3') {
+                        window.open('https://medium.com/@admfawaz', '_blank');
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'projects') {
+                        const projectsDiv = document.querySelector('.projects').cloneNode(true);
+                        projectsDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', projectsDiv);
+                        commandHandled = true;
+                    }
+
+                    if (inputValue === 'projects --more') {
+                        const projectsMoreDiv = document.querySelector('.projects-more').cloneNode(true);
+                        projectsMoreDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', projectsMoreDiv);
+                        commandHandled = true;
+                    }
+
+                    if (!commandHandled) {
+                        const errorDiv = document.querySelector('.error').cloneNode(true);
+                        errorDiv.innerHTML = `<p>command not found: ${inputValue}</p>`;
+                        errorDiv.style.display = 'block';
+                        inputElement.parentNode.insertAdjacentElement('afterend', errorDiv);
+                    }
+                }
+
+                // Always insert the new input container after the last rendered element
+                const newInputContainer = document.createElement('div');
+                newInputContainer.className = 'input-container';
+                newInputContainer.innerHTML = `
+                    <p><span style="color: #ff9d00;">visitor</span>@<span style="color: #05ce92;">adamfawaz.com</span>:~$</p>
+                    <input type="text">
+                `;
+
+                inputElement.parentNode.nextElementSibling.insertAdjacentElement('afterend', newInputContainer);
+
+                const newInput = newInputContainer.querySelector('input');
+                newInput.addEventListener('keydown', handleInput);
+                focusInput(newInput);
+            }
+
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                clearAutocompleteOptions();
+                if (commandHistory.length > 0) {
+                    if (event.key === 'ArrowUp') {
+                        if (historyIndex < commandHistory.length - 1) {
+                            historyIndex++;
+                        }
+                    } else if (event.key === 'ArrowDown') {
+                        if (historyIndex > 0) {
+                            historyIndex--;
+                        } else {
+                            historyIndex = -1;
+                        }
+                    }
+
+                    if (historyIndex >= 0) {
+                        inputElement.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                    } else {
+                        inputElement.value = '';
+                    }
+
+                    // Move cursor to the end of the input
+                    moveCursorToEnd(inputElement);
+                }
+            }
+
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                const inputValue = inputElement.value.trim();
+                const matchingMainCommands = mainCommands.filter(cmd => cmd.startsWith(inputValue));
+                const matchingSubCommands = commands.filter(cmd => cmd.startsWith(inputValue));
+
+                if (matchingMainCommands.length === 1 && inputValue === matchingMainCommands[0]) {
+                    renderAutocompleteOptions(matchingSubCommands.slice(1), inputElement);
+                } else if (matchingMainCommands.length === 1) {
+                    inputElement.value = matchingMainCommands[0];
+                    moveCursorToEnd(inputElement);
+                } else if (matchingMainCommands.length > 1) {
+                    renderAutocompleteOptions(matchingMainCommands, inputElement);
+                }
+            }
+        }
+
+        function renderAutocompleteOptions(options, inputElement) {
+            clearAutocompleteOptions();
+            const autocompleteDiv = document.createElement('div');
+            autocompleteDiv.className = 'autocomplete-options';
+            autocompleteDiv.innerText = options.join('     ');
+            inputElement.parentNode.insertAdjacentElement('afterend', autocompleteDiv);
+            autocompleteDiv.style.display = 'block';
+        }
+
+        function clearAutocompleteOptions() {
+            const existingAutocompleteDiv = document.querySelector('.autocomplete-options');
+            if (existingAutocompleteDiv) {
+                existingAutocompleteDiv.remove();
+            }
+        }
+
+        function clearAllDivs() {
+            document.body.innerHTML = '';
+            const newInputContainer = document.createElement('div');
+            newInputContainer.className = 'input-container';
+            newInputContainer.innerHTML = `
+                <p><span style="color: #ff9d00;">visitor</span>@<span style="color: #05ce92;">adamfawaz.com</span>:~$</p>
+                <input type="text">
+            `;
+            document.body.appendChild(newInputContainer);
+
+            const helpDiv = document.createElement('div');
+            helpDiv.className = 'help';
+            helpDiv.style.display = 'none';
+            helpDiv.innerHTML = `
+                <p>Welcome to Adam Fawaz's portfolio.</p>
+                <p class="help-divider">----</p>
+                <p>To find the information you're looking for, use the commands below.</p>
+                <p class="help-divider">----</p>
+                <div class="help-feature">
+                    <p>about</p>
+                    <p>- about Adam Fawaz</p>
+                </div>
+                <div class="help-feature">
+                    <p>education</p>
+                    <p>- my education background</p>
+                </div>
+                <div class="help-feature">
+                    <p>projects</p>
+                    <p>- view projects I have made</p>
+                </div>
+                <div class="help-feature">
+                    <p>email</p>
+                    <p>- send an email to me</p>
+                </div>
+                <div class="help-feature">
+                    <p>socials</p>
+                    <p>- check out my social accounts</p>
+                </div>
+                <div class="help-feature">
+                    <p>themes</p>
+                    <p>- check available themes</p>
+                </div>
+                <div class="help-feature">
+                    <p>help</p>
+                    <p>- check available commands</p>
+                </div>
+                <p class="help-divider">----</p>
+                <div class="help-tool">
+                    <p>Tab</p>
+                    <p>=> autocompletes the command</p>
+                </div>
+                <div class="help-tool">
+                    <p>Up Arrow</p>
+                    <p>=> go back to previous command</p>
+                </div>
+                <div class="help-tool">
+                    <p>Ctrl + l</p>
+                    <p>=> clear the terminal</p>
+                </div>
+            `;
+            document.body.appendChild(helpDiv);
+
+            const aboutDiv = document.createElement('div');
+            aboutDiv.className = 'about';
+            aboutDiv.style.display = 'none';
+            aboutDiv.innerHTML = `
+                <p>Hey there, my name is <span style="font-weight: 700;">Adam Fawaz</span>!</p>
+                <p>I am Computer Science student at the University of Warwick. I have previously interned as a Software Engineer and enjoy working on personal projects in my own time. I am really interested in the applications of software in the fields of quantitative finance and AI.</p>
+                <p>Apart from computers, I love traveling, learning about other cultures, spending time with my two pet cats, and trying new foods!</p>
+            `;
+            document.body.appendChild(aboutDiv);
+
+            const educationDiv = document.createElement('div');
+            educationDiv.className = 'education';
+            educationDiv.style.display = 'none';
+            educationDiv.innerHTML = `
+                <div style="height: 4px;"></div>
+                <p style="font-weight: 700;">BSc Computer Science</p>
+                <p>University of Warwick | 2023 - 2027 | Expected 1st</p>
+                <br>
+                <p style="font-weight: 700;">A-Levels: Maths, Further Maths, Physics, Spanish</p>
+                <p>St Dominic's Sixth Form College | 2021 - 2023 | A*AAA</p>
+                <br>
+                <p>Usage: education --more</p>
+            `;
+            document.body.appendChild(educationDiv);
+
+            const educationMoreDiv = document.createElement('div');
+            educationMoreDiv.className = 'education-more';
+            educationMoreDiv.style.display = 'none';
+            educationMoreDiv.innerHTML = `
+                <div style="height: 4px;"></div>
+                <p style="font-weight: 700;">BSc Computer Science</p>
+                <p>University of Warwick | 2023 - 2027 | Expected 1st</p>
+                <div style="height: 4px;"></div>
+                <p>+ 1st Year Modules:</p>
+                <p>- CS118 Programming for Computer Scientists (Java)</p>
+                <p>- CS126 Design of Information Structures (DSA)</p>
+                <p>- CS130 Discrete Maths (Logic, Sets, Relations, Functions, Graphs, Inductive Proofs)</p>
+                <p>- CS131 Applied Maths (Linear Algebra, Multivariable Calculus, Sequences and Series)</p>
+                <p>- CS132 Computer Organisation and Architecture</p>
+                <p>- CS133 Professional Skills</p>
+                <p>- CS139 Web Development Technologies</p>
+                <p>- IB132 Foundations of Finance</p>
+                <br>
+                <p style="font-weight: 700;">A-Levels: Maths, Further Maths, Physics, Spanish</p>
+                <p>St Dominic's Sixth Form College | 2021 - 2023 | A*AAA</p>
+            `;
+            document.body.appendChild(educationMoreDiv);
+
+            const projectsDiv = document.createElement('div');
+            projectsDiv.className = 'projects';
+            projectsDiv.style.display = 'none';
+            projectsDiv.innerHTML = `
+                <div style="height: 4px;"></div>
+                <p><span style="font-weight: 700;">Warwick Washer API Wrapper</span> | June 2024</p>
+                <p>Skills: Python, Flask, REST API</p>
+                <br>
+                <p><span style="font-weight: 700;">IMDB Style App</span> | March 2024</p>
+                <p>Skills: Java, Gradle</p>
+                <br>
+                <p><span style="font-weight: 700;">eventmate - Event Management Web App</span> | February 2024</p>
+                <p>Skills: Python, Flask, SQLite, HTML/CSS/JS</p>
+                <br>
+                <p><span style="font-weight: 700;">Heuristic Based Maze Solver</span> | December 2023</p>
+                <p>Skills: Java, Graph Theory (BFS, DFS)</p>
+                <br>
+                <p>Usage: projects --more</p>
+            `;
+            document.body.appendChild(projectsDiv);
+
+            const projectsMoreDiv = document.createElement('div');
+            projectsMoreDiv.className = 'projects-more';
+            projectsMoreDiv.style.display = 'none';
+            projectsMoreDiv.innerHTML = `
+                <div style="height: 4px;"></div>
+                <p><span style="font-weight: 700;">Warwick Washer API Wrapper</span> | June 2024</p>
+                <p>Skills: Python, Flask, REST API</p>
+                <br>
+                <p><span style="font-weight: 700;">IMDB Style App</span> | March 2024</p>
+                <p>Skills: Java, Gradle</p>
+                <p>+ Developed the “Warwick+” app with 3 custom data structures: ScalableList, HashMap, and LinkedList.</p>
+                <p>+ Enhanced the ScalableList data structure by implementing methods such as addUnique and resizeDown, optimising array functionality and memory usage.</p>
+                <p>+ Utilised composite keys in the HashMap structure and implemented collision handling using linked lists.</p>
+                <p>+ Built a comprehensive test suite with over 150 tests using Gradle to validate the reliability of the data structures and ensured efficient performance using timing tests.</p>
+                <br>
+                <p><span style="font-weight: 700;">eventmate - Event Management Web App</span> | February 2024</p>
+                <p>Skills: Python, Flask, SQLite, HTML/CSS/JS</p>
+                <p>+ Developed a full stack event management web app, utilising Python (flask) for the backend and SQLite as the database.</p>
+                <p>+ Implemented authentication using werkzeug, and mail services using flask-mail.</p>
+                <p>+ Created a simple to use Usher REST API to integrate ticket verification into other applications.</p>
+                <p>+ Utilised the python-barcode library to generate barcodes for tickets.</p>
+                <br>
+                <p><span style="font-weight: 700;">Heuristic Based Maze Solver</span> | December 2023</p>
+                <p>Skills: Java, Graph Theory (BFS, DFS)</p>
+                <p>+ Designed and implemented a robot maze solver that learns and optimises its path by abstracting the problem to a tree traversal, using depth-first search for initial discovery.</p>
+                <p>+ Stored junction data during the first run in a stack data structure for implementation of a backtracking algorithm.</p>
+                <p>+ Utilised the A* algorithm to compute the most efficient path for subsequent runs.</p>
+                <p>+ Integrated the project with a real-time maze environment API for rendering and control purposes.</p>
+            `;
+            document.body.appendChild(projectsMoreDiv);
+
+            const emailDiv = document.createElement('div');
+            emailDiv.className = 'email';
+            emailDiv.style.display = 'none';
+            emailDiv.innerHTML = `
+                <p>me@adamfawaz.com</p>
+            `;
+            document.body.appendChild(emailDiv);
+
+            const socialsDiv = document.createElement('div');
+            socialsDiv.className = 'socials';
+            socialsDiv.style.display = 'none';
+            socialsDiv.innerHTML = `
+                <p><span>1. LinkedIn:</span> linkedin.com/in/adam-fawaz/</p>
+                <p><span>2. GitHub:</span> github.com/adam-fawaz</p>
+                <p><span>3. Medium:</span> medium.com/@admfawaz</p>
+                <br>
+                <p>Usage: socials go &lt;social-no&gt; </p>
+                <p>eg: socials go 1</p>
+            `;
+            document.body.appendChild(socialsDiv);
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.style.display = 'none';
+            errorDiv.innerHTML = `<p>command not found: {command}</p>`;
+            document.body.appendChild(errorDiv);
+
+            const newInput = newInputContainer.querySelector('input');
+            newInput.addEventListener('keydown', handleInput);
+            focusInput(newInput);
+        }
+
+        window.onload = function() {
+            setDefaultTheme();
+            const initialInput = document.querySelector('.input-container input');
+            initialInput.addEventListener('keydown', handleInput);
+            focusInput(initialInput);
+
+            // Automatically enter "help" and trigger enter
+            initialInput.value = 'help';
+            const event = new KeyboardEvent('keydown', { key: 'Enter' });
+            initialInput.dispatchEvent(event);
+
+            // Add event listener for Ctrl + L to clear all divs
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    clearAllDivs();
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+    <div class="input-container">
+        <p><span style="color: #ff9d00;">visitor</span>@<span style="color: #05ce92;">adamfawaz.com</span>:~$</p>
+        <input type="text">
+    </div>
+
+    <div class="help">
+        <p>Welcome to Adam Fawaz's portfolio.</p>
+        <p class="help-divider">----</p>
+        <p>To find the information you're looking for, use the commands below.</p>
+        <p class="help-divider">----</p>
+        <div class="help-feature">
+            <p>about</p>
+            <p>- about Adam Fawaz</p>
+        </div>
+        <div class="help-feature">
+            <p>education</p>
+            <p>- my education background</p>
+        </div>
+        <div class="help-feature">
+            <p>projects</p>
+            <p>- view projects I have made</p>
+        </div>
+        <div class="help-feature">
+            <p>email</p>
+            <p>- send an email to me</p>
+        </div>
+        <div class="help-feature">
+            <p>socials</p>
+            <p>- check out my social accounts</p>
+        </div>
+        <div class="help-feature">
+            <p>themes</p>
+            <p>- check available themes</p>
+        </div>
+        <div class="help-feature">
+            <p>help</p>
+            <p>- check available commands</p>
+        </div>
+        <p class="help-divider">----</p>
+        <div class="help-tool">
+            <p>Tab</p>
+            <p>=> autocompletes the command</p>
+        </div>
+        <div class="help-tool">
+            <p>Up Arrow</p>
+            <p>=> go back to previous command</p>
+        </div>
+        <div class="help-tool">
+            <p>Ctrl + l</p>
+            <p>=> clear the terminal</p>
+        </div>
+    </div>
+
+    <div class="about">
+        <p>Hey there, my name is <span style="font-weight: 700;">Adam Fawaz</span>!</p>
+        <p>I am Computer Science student at the University of Warwick. I have previously interned as a Software Engineer and enjoy working on personal projects in my own time. I am really interested in the applications of software in the fields of quantitative finance and AI.</p>
+        <p>Apart from computers, I love traveling, learning about other cultures, spending time with my two pet cats, and trying new foods!</p>
+    </div>
+
+    <div class="education">
+        <div style="height: 4px;"></div>
+        <p style="font-weight: 700;">BSc Computer Science</p>
+        <p>University of Warwick | 2023 - 2027 | Expected 1st</p>
+        <br>
+        <p style="font-weight: 700;">A-Levels: Maths, Further Maths, Physics, Spanish</p>
+        <p>St Dominic's Sixth Form College | 2021 - 2023 | A*AAA</p>
+        <br>
+        <p>Usage: education --more</p>
+    </div>
+
+    <div class="education-more">
+        <div style="height: 4px;"></div>
+        <p style="font-weight: 700;">BSc Computer Science</p>
+        <p>University of Warwick | 2023 - 2027 | Expected 1st</p>
+        <div style="height: 4px;"></div>
+        <p>+ 1st Year Modules:</p>
+        <p>- CS118 Programming for Computer Scientists (Java)</p>
+        <p>- CS126 Design of Information Structures (DSA)</p>
+        <p>- CS130 Discrete Maths (Logic, Sets, Relations, Functions, Graphs, Inductive Proofs)</p>
+        <p>- CS131 Applied Maths (Linear Algebra, Multivariable Calculus, Sequences and Series)</p>
+        <p>- CS132 Computer Organisation and Architecture</p>
+        <p>- CS133 Professional Skills</p>
+        <p>- CS139 Web Development Technologies</p>
+        <p>- IB132 Foundations of Finance</p>
+        <br>
+        <p style="font-weight: 700;">A-Levels: Maths, Further Maths, Physics, Spanish</p>
+        <p>St Dominic's Sixth Form College | 2021 - 2023 | A*AAA</p>
+    </div>
+
+    <div class="projects">
+        <div style="height: 4px;"></div>
+        <p><span style="font-weight: 700;">Warwick Washer API Wrapper</span> | June 2024</p>
+        <p>Skills: Python, Flask, REST API</p>
+        <br>
+        <p><span style="font-weight: 700;">IMDB Style App</span> | March 2024</p>
+        <p>Skills: Java, Gradle</p>
+        <br>
+        <p><span style="font-weight: 700;">eventmate - Event Management Web App</span> | February 2024</p>
+        <p>Skills: Python, Flask, SQLite, HTML/CSS/JS</p>
+        <br>
+        <p><span style="font-weight: 700;">Heuristic Based Maze Solver</span> | December 2023</p>
+        <p>Skills: Java, Graph Theory (BFS, DFS)</p>
+        <br>
+        <p>Usage: projects --more</p>
+    </div>
+
+    <div class="projects-more">
+        <div style="height: 4px;"></div>
+        <p><span style="font-weight: 700;">Warwick Washer API Wrapper</span> | June 2024</p>
+        <p>Skills: Python, Flask, REST API</p>
+        <br>
+        <p><span style="font-weight: 700;">IMDB Style App</span> | March 2024</p>
+        <p>Skills: Java, Gradle</p>
+        <p>+ Developed the “Warwick+” app with 3 custom data structures: ScalableList, HashMap, and LinkedList.</p>
+        <p>+ Enhanced the ScalableList data structure by implementing methods such as addUnique and resizeDown, optimising array functionality and memory usage.</p>
+        <p>+ Utilised composite keys in the HashMap structure and implemented collision handling using linked lists.</p>
+        <p>+ Built a comprehensive test suite with over 150 tests using Gradle to validate the reliability of the data structures and ensured efficient performance using timing tests.</p>
+        <br>
+        <p><span style="font-weight: 700;">eventmate - Event Management Web App</span> | February 2024</p>
+        <p>Skills: Python, Flask, SQLite, HTML/CSS/JS</p>
+        <p>+ Developed a full stack event management web app, utilising Python (flask) for the backend and SQLite as the database.</p>
+        <p>+ Implemented authentication using werkzeug, and mail services using flask-mail.</p>
+        <p>+ Created a simple to use Usher REST API to integrate ticket verification into other applications.</p>
+        <p>+ Utilised the python-barcode library to generate barcodes for tickets.</p>
+        <br>
+        <p><span style="font-weight: 700;">Heuristic Based Maze Solver</span> | December 2023</p>
+        <p>Skills: Java, Graph Theory (BFS, DFS)</p>
+        <p>+ Designed and implemented a robot maze solver that learns and optimises its path by abstracting the problem to a tree traversal, using depth-first search for initial discovery.</p>
+        <p>+ Stored junction data during the first run in a stack data structure for implementation of a backtracking algorithm.</p>
+        <p>+ Utilised the A* algorithm to compute the most efficient path for subsequent runs.</p>
+        <p>+ Integrated the project with a real-time maze environment API for rendering and control purposes.</p>
+    </div>
+
+    <div class="email">
+        <p>me@adamfawaz.com</p>
+    </div>
+
+    <div class="socials">
+        <p><span>1. LinkedIn:</span> linkedin.com/in/adam-fawaz/</p>
+        <p><span>2. GitHub:</span> github.com/adam-fawaz</p>
+        <p><span>3. Medium:</span> medium.com/@admfawaz</p>
+        <br>
+        <p>Usage: socials go &lt;social-no&gt; </p>
+        <p>eg: socials go 1</p>
+    </div>
+
+    <div class="error">
+        <p>command not found: {command}</p>
+    </div>
+</body>
+</html>
