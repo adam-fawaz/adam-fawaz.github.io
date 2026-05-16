@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coming Soon</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap");
@@ -14,7 +17,9 @@
       margin: 0;
       width: 100%;
       height: 100%;
+      overflow: hidden;
       background-color: rgb(178, 198, 142);
+      font-family: "Inter", sans-serif;
     }
 
     body {
@@ -30,24 +35,379 @@
       gap: 24px;
     }
 
-    img {
+    .logo-wrap {
       width: 30vw;
-      height: auto;
       display: block;
     }
 
-    p {
+    .logo-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .physics-piece {
+      will-change: transform;
+    }
+
+    .physics-text {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       margin: 0;
-      font-family: "Inter", sans-serif;
       color: rgb(45, 73, 43);
       font-size: 1.5rem;
+      cursor: default;
+      user-select: none;
+      will-change: left, top;
+      touch-action: none;
+      white-space: nowrap;
     }
   </style>
 </head>
+
 <body>
   <div class="content">
-    <img src="./logo.svg" alt="Logo" />
-    <p>Coming soon.</p>
+    <div class="logo-wrap" id="logoWrap"></div>
+    <p class="physics-text">Coming soon.</p>
   </div>
+
+  <script>
+    const logoWrap = document.querySelector("#logoWrap");
+    const text = document.querySelector(".physics-text");
+
+    const bodies = [];
+
+    const textBody = {
+      type: "text",
+      element: text,
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2 + 120,
+      homeX: window.innerWidth / 2,
+      homeY: window.innerHeight / 2 + 120,
+      vx: 0,
+      vy: 0
+    };
+
+    let collisionsEnabled = false;
+    let returningHome = false;
+
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let lastTime = performance.now();
+
+    async function loadSvg() {
+      const response = await fetch("./logo.svg");
+      const svgText = await response.text();
+
+      logoWrap.innerHTML = svgText;
+
+      const svg = logoWrap.querySelector("svg");
+
+      const originalPieces = Array.from(svg.children).filter((el) => {
+        if (!["path", "g"].includes(el.tagName.toLowerCase())) return false;
+
+        const box = el.getBBox();
+        return box.width > 0 && box.height > 0;
+      });
+
+      originalPieces.forEach((piece) => {
+        const wrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        wrapper.classList.add("physics-piece");
+
+        piece.parentNode.insertBefore(wrapper, piece);
+        wrapper.appendChild(piece);
+
+        bodies.push({
+          type: "svg",
+          element: wrapper,
+          x: 0,
+          y: 0,
+          homeX: 0,
+          homeY: 0,
+          vx: 0,
+          vy: 0
+        });
+      });
+
+      setInitialTextPosition();
+      animate();
+    }
+
+    function setInitialTextPosition() {
+      const logoRect = logoWrap.getBoundingClientRect();
+      const textRect = text.getBoundingClientRect();
+      const gap = 24;
+
+      textBody.x = logoRect.left + logoRect.width / 2;
+      textBody.y = logoRect.bottom + gap + textRect.height / 2;
+
+      textBody.homeX = textBody.x;
+      textBody.homeY = textBody.y;
+
+      moveBody(textBody);
+    }
+
+    window.addEventListener("resize", () => {
+      setInitialTextPosition();
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      const allBodies = [...bodies, textBody];
+
+      const clickedBody = allBodies.some((body) => {
+        const rect = getBodyRect(body);
+
+        return (
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom
+        );
+      });
+
+      if (!clickedBody) {
+        returnAllHome();
+      }
+    });
+
+    document.addEventListener("pointermove", (event) => {
+      if (returningHome) return;
+
+      const now = performance.now();
+      const dt = Math.max(now - lastTime, 16);
+
+      const pointerVx = (event.clientX - lastPointerX) / dt;
+      const pointerVy = (event.clientY - lastPointerY) / dt;
+
+      const impactStrength = 45;
+
+      bodies.forEach((body) => {
+        const rect = getBodyRect(body);
+
+        const isHitting =
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+
+        if (isHitting) {
+          collisionsEnabled = true;
+
+          body.vx += pointerVx * impactStrength;
+          body.vy += pointerVy * impactStrength;
+        }
+      });
+
+      const textRect = getBodyRect(textBody);
+
+      const isHittingText =
+        event.clientX >= textRect.left &&
+        event.clientX <= textRect.right &&
+        event.clientY >= textRect.top &&
+        event.clientY <= textRect.bottom;
+
+      if (isHittingText) {
+        collisionsEnabled = true;
+
+        textBody.vx += pointerVx * impactStrength;
+        textBody.vy += pointerVy * impactStrength;
+      }
+
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      lastTime = now;
+    });
+
+    function returnAllHome() {
+      collisionsEnabled = false;
+      returningHome = true;
+
+      [...bodies, textBody].forEach((body) => {
+        body.vx = 0;
+        body.vy = 0;
+      });
+    }
+
+    function moveBody(body) {
+      if (body.type === "svg") {
+        body.element.setAttribute("transform", `translate(${body.x} ${body.y})`);
+      } else {
+        body.element.style.left = `${body.x}px`;
+        body.element.style.top = `${body.y}px`;
+      }
+    }
+
+    function getBodyRect(body) {
+      return body.element.getBoundingClientRect();
+    }
+
+    function bounceBodyOffViewport(body, bounce) {
+      const rect = getBodyRect(body);
+
+      if (body.type === "svg") {
+        if (rect.left < 0) {
+          body.x += -rect.left;
+          body.vx = Math.abs(body.vx) * bounce;
+        }
+
+        if (rect.right > window.innerWidth) {
+          body.x -= rect.right - window.innerWidth;
+          body.vx = -Math.abs(body.vx) * bounce;
+        }
+
+        if (rect.top < 0) {
+          body.y += -rect.top;
+          body.vy = Math.abs(body.vy) * bounce;
+        }
+
+        if (rect.bottom > window.innerHeight) {
+          body.y -= rect.bottom - window.innerHeight;
+          body.vy = -Math.abs(body.vy) * bounce;
+        }
+      } else {
+        const width = rect.width;
+        const height = rect.height;
+
+        if (body.x - width / 2 < 0) {
+          body.x = width / 2;
+          body.vx = Math.abs(body.vx) * bounce;
+        }
+
+        if (body.x + width / 2 > window.innerWidth) {
+          body.x = window.innerWidth - width / 2;
+          body.vx = -Math.abs(body.vx) * bounce;
+        }
+
+        if (body.y - height / 2 < 0) {
+          body.y = height / 2;
+          body.vy = Math.abs(body.vy) * bounce;
+        }
+
+        if (body.y + height / 2 > window.innerHeight) {
+          body.y = window.innerHeight - height / 2;
+          body.vy = -Math.abs(body.vy) * bounce;
+        }
+      }
+
+      moveBody(body);
+    }
+
+    function collideBodies(a, b) {
+      const rectA = getBodyRect(a);
+      const rectB = getBodyRect(b);
+
+      const ax = rectA.left + rectA.width / 2;
+      const ay = rectA.top + rectA.height / 2;
+      const bx = rectB.left + rectB.width / 2;
+      const by = rectB.top + rectB.height / 2;
+
+      const overlapX = rectA.width / 2 + rectB.width / 2 - Math.abs(ax - bx);
+      const overlapY = rectA.height / 2 + rectB.height / 2 - Math.abs(ay - by);
+
+      if (overlapX > 0 && overlapY > 0) {
+        const collisionBounce = 0.85;
+
+        if (overlapX < overlapY) {
+          const push = overlapX / 2;
+          const direction = ax < bx ? -1 : 1;
+
+          a.x += push * direction;
+          b.x -= push * direction;
+
+          const tempVx = a.vx;
+          a.vx = b.vx * collisionBounce;
+          b.vx = tempVx * collisionBounce;
+        } else {
+          const push = overlapY / 2;
+          const direction = ay < by ? -1 : 1;
+
+          a.y += push * direction;
+          b.y -= push * direction;
+
+          const tempVy = a.vy;
+          a.vy = b.vy * collisionBounce;
+          b.vy = tempVy * collisionBounce;
+        }
+
+        moveBody(a);
+        moveBody(b);
+      }
+    }
+
+    function moveBodiesHome() {
+      const allBodies = [...bodies, textBody];
+
+      let allHome = true;
+
+      allBodies.forEach((body) => {
+        const dx = body.homeX - body.x;
+        const dy = body.homeY - body.y;
+
+        body.x += dx * 0.12;
+        body.y += dy * 0.12;
+
+        if (Math.abs(dx) > 0.3 || Math.abs(dy) > 0.3) {
+          allHome = false;
+        } else {
+          body.x = body.homeX;
+          body.y = body.homeY;
+        }
+
+        moveBody(body);
+      });
+
+      if (allHome) {
+        returningHome = false;
+
+        allBodies.forEach((body) => {
+          body.vx = 0;
+          body.vy = 0;
+          body.x = body.homeX;
+          body.y = body.homeY;
+          moveBody(body);
+        });
+      }
+    }
+
+    function animate() {
+      const bounce = 0.8;
+      const friction = 0.985;
+
+      const allBodies = [...bodies, textBody];
+
+      if (returningHome) {
+        moveBodiesHome();
+        requestAnimationFrame(animate);
+        return;
+      }
+
+      allBodies.forEach((body) => {
+        body.x += body.vx;
+        body.y += body.vy;
+
+        moveBody(body);
+        bounceBodyOffViewport(body, bounce);
+
+        body.vx *= friction;
+        body.vy *= friction;
+      });
+
+      if (collisionsEnabled) {
+        for (let i = 0; i < allBodies.length; i++) {
+          for (let j = i + 1; j < allBodies.length; j++) {
+            collideBodies(allBodies[i], allBodies[j]);
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    loadSvg();
+  </script>
 </body>
 </html>
