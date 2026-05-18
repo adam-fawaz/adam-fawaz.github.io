@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>老板</title>
+  <style>
+    :root {
+      --bg: rgb(240, 228, 220);
+      --tile-w: 250px;
+      --tile-h: 130px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    body {
+      position: relative;
+    }
+
+    #field {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .row {
+      position: absolute;
+      left: 0;
+      height: var(--tile-h);
+      display: flex;
+      align-items: center;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    .tile {
+      width: var(--tile-w);
+      height: var(--tile-h);
+      flex: 0 0 var(--tile-w);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    .tile.solid {
+      background-image: url("./laoban_solid.svg");
+    }
+
+    .tile.outline {
+      background-image: url("./laoban_outline.svg");
+    }
+  </style>
+</head>
+<body>
+  <main id="field" aria-label="Animated tessellating laoban pattern"></main>
+
+  <script>
+    const SOLID = "solid";
+    const OUTLINE = "outline";
+
+    const config = {
+      tileWidth: 250,
+      tileHeight: 130,
+      rowGap: 5,
+      background: "rgb(240, 228, 220)",
+      minSpeed: 24,
+      maxSpeed: 72,
+      brakeAcceleration: 180,
+      restartAcceleration: 180,
+    };
+
+    const field = document.getElementById("field");
+    const rows = [];
+    let centreRowIndex = 0;
+    let centreColIndex = 0;
+    let lastTime = performance.now();
+
+    document.documentElement.style.setProperty("--tile-w", `${config.tileWidth}px`);
+    document.documentElement.style.setProperty("--tile-h", `${config.tileHeight}px`);
+    document.documentElement.style.setProperty("--bg", config.background);
+
+    function tileType(rowIndex, colIndex) {
+      // Checkerboard alternation measured from the centred laoban:
+      // centre = solid; immediate left/right/up/down = outline; diagonals = solid.
+      const distanceFromCentre = Math.abs(rowIndex - centreRowIndex) + Math.abs(colIndex - centreColIndex);
+      return distanceFromCentre % 2 === 0 ? SOLID : OUTLINE;
+    }
+
+    function makeTile(type) {
+      const tile = document.createElement("div");
+      tile.className = `tile ${type}`;
+      return tile;
+    }
+
+    function uniqueSpeed(rowIndex) {
+      // Deterministic, varied speeds. Every row has a different velocity.
+      const span = config.maxSpeed - config.minSpeed;
+      const n = (rowIndex * 37 + 19) % 101;
+      return config.minSpeed + (n / 100) * span;
+    }
+
+    function buildRows() {
+      field.textContent = "";
+      rows.length = 0;
+
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const rowStep = config.tileHeight + config.rowGap;
+      const rowCount = Math.ceil(viewportH / rowStep) + 2;
+      const colCount = Math.ceil(viewportW / config.tileWidth) + 4;
+
+      centreRowIndex = Math.floor(rowCount / 2);
+      centreColIndex = Math.floor(colCount / 2);
+
+      for (let r = 0; r < rowCount; r++) {
+        const rowEl = document.createElement("div");
+        rowEl.className = "row";
+
+        const top = (viewportH / 2) - ((centreRowIndex + 0.5) * rowStep) + (r * rowStep);
+        rowEl.style.top = `${top}px`;
+
+        const direction = r % 2 === 0 ? 1 : -1;
+        const speed = uniqueSpeed(r);
+
+        // Place every row on the same column grid so initial columns read
+        // outline, solid, outline, solid vertically.
+        const centreLeft = (viewportW / 2) - (centreColIndex + 0.5) * config.tileWidth;
+        let x = centreLeft;
+
+        for (let c = 0; c < colCount; c++) {
+          const type = tileType(r, c);
+          rowEl.appendChild(makeTile(type));
+        }
+
+        field.appendChild(rowEl);
+
+        rows.push({
+          el: rowEl,
+          rowIndex: r,
+          direction,
+          speed,
+          currentSpeed: speed,
+          targetSpeed: speed,
+          x,
+          top,
+          nextLeftCol: 0,
+          nextRightCol: colCount,
+        });
+      }
+    }
+
+    function prependTile(row) {
+      row.nextLeftCol -= 1;
+      row.el.insertBefore(makeTile(tileType(row.rowIndex, row.nextLeftCol)), row.el.firstChild);
+      row.x -= config.tileWidth;
+    }
+
+    function appendTile(row) {
+      row.el.appendChild(makeTile(tileType(row.rowIndex, row.nextRightCol)));
+      row.nextRightCol += 1;
+    }
+
+    function trimRow(row) {
+      const buffer = config.tileWidth * 2;
+      const viewportW = window.innerWidth;
+
+      while (row.x > -buffer) {
+        prependTile(row);
+      }
+
+      while (row.x + row.el.children.length * config.tileWidth < viewportW + buffer) {
+        appendTile(row);
+      }
+
+      while (row.el.children.length > 0 && row.x + config.tileWidth < -buffer) {
+        row.el.removeChild(row.el.firstChild);
+        row.x += config.tileWidth;
+        row.nextLeftCol += 1;
+      }
+
+      while (
+        row.el.children.length > 0 &&
+        row.x + (row.el.children.length - 1) * config.tileWidth > viewportW + buffer
+      ) {
+        row.el.removeChild(row.el.lastChild);
+        row.nextRightCol -= 1;
+      }
+    }
+
+    function animate(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      for (const row of rows) {
+        const acceleration = row.targetSpeed === 0
+          ? config.brakeAcceleration
+          : config.restartAcceleration;
+
+        if (row.currentSpeed < row.targetSpeed) {
+          row.currentSpeed = Math.min(row.currentSpeed + acceleration * dt, row.targetSpeed);
+        } else if (row.currentSpeed > row.targetSpeed) {
+          row.currentSpeed = Math.max(row.currentSpeed - acceleration * dt, row.targetSpeed);
+        }
+
+        row.x += row.direction * row.currentSpeed * dt;
+        trimRow(row);
+        row.el.style.transform = `translate3d(${row.x}px, 0, 0)`;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function hoveredRowFromY(y) {
+      // Only count the actual laoban strip as hoverable, not the tiny gap
+      // between rows. Moving into the gap restarts every row.
+      return rows.find(row => y >= row.top && y < row.top + config.tileHeight);
+    }
+
+    function setHoveredRow(hovered) {
+      for (const row of rows) {
+        row.targetSpeed = row === hovered ? 0 : row.speed;
+      }
+    }
+
+    field.addEventListener("pointermove", event => {
+      setHoveredRow(hoveredRowFromY(event.clientY));
+    });
+
+    field.addEventListener("pointerleave", () => {
+      setHoveredRow(null);
+    });
+
+    window.addEventListener("blur", () => {
+      setHoveredRow(null);
+    });
+
+    buildRows();
+    requestAnimationFrame(animate);
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        buildRows();
+        lastTime = performance.now();
+      }, 120);
+    });
+  </script>
+</body>
+</html>
