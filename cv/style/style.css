@@ -88,10 +88,10 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #222;
-        --grey1: #eee;
-        --grey2: #bbb;
-        --grey3: #888;
+        --background: rgb(17, 21, 16);
+        --grey1: rgb(215, 228, 195);
+        --grey2: rgb(164, 185, 130);
+        --grey3: rgb(181, 203, 144);
         --wash1: #4e4e4e;
         --wash2: #383838;
         --transparentBorder:hsla(0, 0%, 100%, .1)
