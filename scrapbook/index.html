@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adam Fawaz | Scrapbook</title>
+
+  <style>
+    @font-face {
+      font-family: "Bell Gothic Std Black";
+      src: url("static/bell_gothic_std_black.otf") format("opentype");
+      font-weight: 900;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: "FF Magda Clean Mono OT";
+      src: url("static/ff_magda_clean_mono_ot_regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image: url("static/background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    h1 {
+      font-family: "Bell Gothic Std Black", Arial, sans-serif;
+      font-size: clamp(2.25rem, 6vw, 5rem);
+      line-height: 0.95;
+      color: #000;
+      letter-spacing: -0.03em;
+    }
+
+    p {
+      margin-top: 1rem;
+      font-family: "FF Magda Clean Mono OT", monospace;
+      font-size: clamp(1rem, 2.5vw, 2rem);
+      color: #333;
+      letter-spacing: 0.02em;
+    }
+
+    .sneak-peek {
+      display: inline-block;
+      margin-top: 2.25rem;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+
+      font-family: "FF Magda Clean Mono OT", monospace;
+      font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+      text-decoration: none;
+
+      background: #333;
+      color: transparent;
+      background-clip: text;
+      -webkit-background-clip: text;
+
+      border: 1.5px solid #333;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .sneak-peek:hover {
+      transform: translateY(-2px);
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Digital Scrapbook</h1>
+    <p>Coming soon.</p>
+    <a href="./demo" class="sneak-peek">Have a sneak peak ↗</a>
+  </main>
+</body>
+</html>
