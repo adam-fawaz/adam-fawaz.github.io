@@ -20,7 +20,7 @@
 
     body {
       min-height: 100vh;
-      background-image: url("../static/background.png");
+      background-image: url("static/background.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -43,6 +43,28 @@
 </head>
 
 <body>
-  <img src="./static/pvgkul190925.png" alt="" />
+  <img id="ticket" src="" alt="Random ticket" />
+
+  <script>
+    const tickets = [
+      "beystn280126.png",
+      "gydlgw161125.png",
+      "gydtas071125.png",
+      "hkgpek290925.png",
+      "istvko190325.png",
+      "ledist300325.png",
+      "lgwpvg050925.png",
+      "lhrgyd061125.png",
+      "lhrpvg080226.png",
+      "pvgkul190925.png",
+      "sdqmad020126.png",
+      "tasgyd161125.png",
+      "ugctas151125.png"
+    ];
+
+    const randomTicket = tickets[Math.floor(Math.random() * tickets.length)];
+
+    document.getElementById("ticket").src = `./static/${randomTicket}`;
+  </script>
 </body>
 </html>
